@@ -6,6 +6,8 @@ class Model:
     def __init__(self):
         self.G = nx.Graph()
 
+
+
     def build_graph(self, year: int):
         """
         Costruisce il grafo (self.G) dei rifugi considerando solo le connessioni
@@ -13,14 +15,22 @@ class Model:
         Quindi il grafo avrà solo i nodi che appartengono almeno ad una connessione, non tutti quelli disponibili.
         :param year: anno limite fino al quale selezionare le connessioni da includere.
         """
-        # TODO
+        lista_rifugi=DAO.leggi_rifugio(year)
+        #prendo i nodi
+        self.G.add_nodes_from(lista_rifugi)
+        #creo gli archi
+        lista_connessioni=DAO.leggi_connessione(year)
+        for c in lista_connessioni:
+            self.G.add_edge(c.r1, c.r2)
+
 
     def get_nodes(self):
         """
         Restituisce la lista dei rifugi presenti nel grafo.
         :return: lista dei rifugi presenti nel grafo.
         """
-        # TODO
+        return self.G.number_of_nodes()
+
 
     def get_num_neighbors(self, node):
         """
