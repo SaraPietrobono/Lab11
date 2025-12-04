@@ -15,13 +15,17 @@ class Model:
         Quindi il grafo avrà solo i nodi che appartengono almeno ad una connessione, non tutti quelli disponibili.
         :param year: anno limite fino al quale selezionare le connessioni da includere.
         """
+        self.G.clear()
         lista_rifugi=DAO.leggi_rifugio(year)
+        self.idMap={r.id: r for r in lista_rifugi}
         #prendo i nodi
         self.G.add_nodes_from(lista_rifugi)
         #creo gli archi
         lista_connessioni=DAO.leggi_connessione(year)
         for c in lista_connessioni:
-            self.G.add_edge(c.r1, c.r2)
+            r1=self.idMap[c.id_rifugio1]
+            r2=self.idMap[c.id_rifugio2]
+            self.G.add_edge(r1, r2)
 
 
     def get_nodes(self):
@@ -29,7 +33,7 @@ class Model:
         Restituisce la lista dei rifugi presenti nel grafo.
         :return: lista dei rifugi presenti nel grafo.
         """
-        return self.G.number_of_nodes()
+        return list(self.G.nodes())
 
 
     def get_num_neighbors(self, node):
@@ -38,14 +42,34 @@ class Model:
         :param node: un rifugio (cioè un nodo del grafo)
         :return: numero di vicini diretti del nodo indicato
         """
-        # TODO
+        return self.G.degree(node)
+
+
 
     def get_num_connected_components(self):
         """
         Restituisce il numero di componenti connesse del grafo.
         :return: numero di componenti connesse
         """
-        # TODO
+        return nx.number_connected_components(self.G)
+
+    def get_reachable_bfs_tree(self,start):
+        tree = nx.bfs_tree(self.G, start)
+        return list(tree.nodes())[1:]
+        # tolgo il nodo di partenza; perchè nel testo ci dice che il rifugio di partenza non deve comparire nella lista dei risultati
+    def get_reachable_recursive(self,start):
+        visited = set()
+        def dfs(u):
+            for v in self.G.neighbors(u):
+                if v not in visited:
+                    visited.add(v)
+                    dfs(v)
+        dfs(start)
+        visited.discard(start) #serve per rimuovere il nodo di partenza dall'insieme dei nodi visitati
+        return list(visited)
+
+
+
 
     def get_reachable(self, start):
         """
@@ -63,5 +87,11 @@ class Model:
 
         return a
         """
+        a = self.get_reachable_bfs_tree(start)
+        b = self.get_reachable_recursive(start)
+        #il risultato che ci restituiscono le due funzioni è lo stesso; portano allo stesso risultato
 
-        # TODO
+        return a
+
+
+

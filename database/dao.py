@@ -12,11 +12,11 @@ class DAO:
         conn=DBConnect.get_connection()
         result=[]
         cursor=conn.cursor(dictionary=True)
-        query="""SELECT c.id, LEAST(c.id_rifugio1, id_rifugio2) as r1,
-                GREATEST(c.id_rifugio1, c.id_rifugio2) as r2, c.distanza, c.difficolta, c.durata, c.anno
+        query="""SELECT c.id, LEAST(c.id_rifugio1, id_rifugio2) as id_rifugio1,
+                GREATEST(c.id_rifugio1, c.id_rifugio2) as id_rifugio2, c.distanza, c.difficolta, c.durata, c.anno
                 FROM connessione as c
-                WHERE c.anno<=year"""
-        cursor.execute(query)
+                WHERE c.anno<=%s"""
+        cursor.execute(query, (year,))
         for row in cursor:
             result.append(Connessione(**row))
         cursor.close()
@@ -30,10 +30,10 @@ class DAO:
         cursor=conn.cursor(dictionary=True)
         query="""SELECT DISTINCT r.id, r.nome, r.localita, r.altitudine, r.capienza, r.aperto
                 FROM rifugio as r, connessione as c
-                WHERE (r.id=c.id_rifugio1 or r.id=c.id_rifugio2) and c.anno<=year
-                GROUP BY r.nome
+                WHERE (r.id=c.id_rifugio1 or r.id=c.id_rifugio2) and c.anno<=%s
+          
 """
-        cursor.execute(query)
+        cursor.execute(query, (year,))
         for row in cursor:
             result.append(Rifugio(**row))
         cursor.close()
